@@ -1,0 +1,9 @@
+{
+  "name": "海外期貨紅綠燈",
+  "short_name": "期貨紅綠燈",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#08131f",
+  "theme_color": "#08131f",
+  "icons": []
+}
