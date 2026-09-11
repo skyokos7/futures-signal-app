@@ -33,7 +33,7 @@ const MARKETS = [
 async function getQuote(item) {
   try {
     const url =
-      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(item.yahoo)}?interval=5m&range=1d`;
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(item.yahoo)}?interval=1d&range=3mo;
 
     const response = await fetch(url, {
       headers: {
@@ -52,7 +52,32 @@ async function getQuote(item) {
     if (!meta) {
       throw new Error("沒有行情資料");
     }
+const q = result?.indicators?.quote?.[0];
 
+const daily = (result?.timestamp ?? []).map((time, i) => ({
+  time,
+  high: q?.high?.[i],
+  low: q?.low?.[i],
+  close: q?.close?.[i]
+})).filter(d =>
+  Number.isFinite(d.high) &&
+  Number.isFinite(d.low) &&
+  Number.isFinite(d.close)
+);
+
+if (daily.length < 20) {
+  throw new Error("歷史日線資料不足");
+}
+
+const closes = daily.map(d => d.close);
+// ===== 計算 MA5 / MA10 / MA20 =====
+const avg = (arr) => {
+  return arr.reduce((sum, value) => sum + value, 0) / arr.length;
+};
+
+const ma5 = avg(closes.slice(-5));
+const ma10 = avg(closes.slice(-10));
+const ma20 = avg(closes.slice(-20));
     return {
       id: item.id,
       name: item.name,
