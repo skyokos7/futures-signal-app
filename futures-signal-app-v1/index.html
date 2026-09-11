@@ -29,45 +29,74 @@
 <div class="note">V1 為介面測試資料。下一階段接行情 API 與你的 Pivot／紅綠燈計算規則。</div>
 </div>
 <script>
-const data=[
-["NQ","小那斯達克","19,542","↑ ↑ ↑","偏多","green"],
-["YM","小道瓊","41,235","↓ → ↓","偏空","red"],
-["EUR","歐元","1.1680","↑ ↑ →","觀望","yellow"],
-["GC","黃金","3,520","↑ ↑ ↑","偏多","green"],
-["HG","高級銅","4.52","↑ → ↑","偏多","green"],
-["ZS","黃豆","1,028","→ ↓ ↓","偏空","red"],
-["ZL","黃豆油","51.20","→ → ↑","觀望","yellow"],
-["ZM","黃豆粉","286.5","↓ ↓ →","偏空","red"],
-["ZW","小麥","525","↓ ↓ ↓","偏空","red"],
-["ZC","玉米","418","→ ↑ ↑","偏多","green"],
-["CL","原油","63.40","↓ → ↓","偏空","red"],
-["BZ","布蘭特原油","67.10","→ → ↓","觀望","yellow"],
-["NG","天然氣","3.05","↑ → ↑","偏多","green"]
-];
-document.getElementById("market").innerHTML=data.map(x=>`
-<div class="row"><div><div class="sym">${x[0]}</div><div class="name">${x[1]}</div></div>
-<div class="price">${x[2]}</div><div class="dir">${x[3]}</div>
-<div class="signal ${x[5]}"><span class="dot"></span>${x[4]}</div></div>`).join("");
-  async function updateNQPrice(){
+let data = [];
+
+function renderMarket(){
+  document.getElementById("market").innerHTML = data.map(x =>
+    `<div class="row">
+      <div>
+        <div class="sym">${x[0]}</div>
+        <div class="name">${x[1]}</div>
+      </div>
+      <div class="price">${x[2]}</div>
+      <div class="dir">${x[3]}</div>
+      <div class="signal ${x[5]}">
+        <span class="dot"></span>${x[4]}
+      </div>
+    </div>`
+  ).join("");
+}
+
+async function loadAllMarkets(){
   try{
     const response = await fetch("/api/quotes");
-    const quote = await response.json();
+    const result = await response.json();
 
-    if(!quote.ok || quote.price == null) return;
+    if(!result.ok || !Array.isArray(result.quotes)) return;
 
-    data[0][2] = Number(quote.price).toLocaleString("en-US");
+    data = result.quotes.map(q => {
+      const price = q.price == null
+        ? "--"
+        : Number(q.price).toLocaleString("en-US", {
+            maximumFractionDigits: 4
+          });
 
-    document.getElementById("market").innerHTML=data.map(x=>
-      `<div class="row"><div><div class="sym">${x[0]}</div><div class="name">${x[1]}</div></div>
-      <div class="price">${x[2]}</div><div class="dir">${x[3]}</div>
-      <div class="signal ${x[5]}"><span class="dot"></span>${x[4]}</div></div>`
-    ).join("");
+      let direction = "→";
+      let status = "持平";
+      let color = "yellow";
+
+      if(q.price != null && q.previousClose != null){
+        if(q.price > q.previousClose){
+          direction = "↑";
+          status = "上漲";
+          color = "green";
+        }else if(q.price < q.previousClose){
+          direction = "↓";
+          status = "下跌";
+          color = "red";
+        }
+      }
+
+      return [
+        q.id,
+        q.name,
+        price,
+        direction,
+        status,
+        color,
+        q.category
+      ];
+    });
+
+    renderMarket();
+
   }catch(error){
-    console.error("NQ 行情更新失敗", error);
+    console.error("完整行情載入失敗", error);
   }
 }
 
-updateNQPrice();
+loadAllMarkets();
+
 if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 </script>
 </body></html>
