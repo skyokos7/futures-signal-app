@@ -48,6 +48,26 @@ document.getElementById("market").innerHTML=data.map(x=>`
 <div class="row"><div><div class="sym">${x[0]}</div><div class="name">${x[1]}</div></div>
 <div class="price">${x[2]}</div><div class="dir">${x[3]}</div>
 <div class="signal ${x[5]}"><span class="dot"></span>${x[4]}</div></div>`).join("");
+  async function updateNQPrice(){
+  try{
+    const response = await fetch("/api/quotes");
+    const quote = await response.json();
+
+    if(!quote.ok || quote.price == null) return;
+
+    data[0][2] = Number(quote.price).toLocaleString("en-US");
+
+    document.getElementById("market").innerHTML=data.map(x=>
+      `<div class="row"><div><div class="sym">${x[0]}</div><div class="name">${x[1]}</div></div>
+      <div class="price">${x[2]}</div><div class="dir">${x[3]}</div>
+      <div class="signal ${x[5]}"><span class="dot"></span>${x[4]}</div></div>`
+    ).join("");
+  }catch(error){
+    console.error("NQ 行情更新失敗", error);
+  }
+}
+
+updateNQPrice();
 if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 </script>
 </body></html>
