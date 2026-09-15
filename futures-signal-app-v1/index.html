@@ -43,7 +43,7 @@ function renderMarket(){
       <div class="signal ${x[5]}">
         <span class="dot"></span>${x[4]}
       </div>
-  <div class="tech">MA5 ${x[6]} ｜ MA10 ${x[7]} ｜ MA20 ${x[8]} ｜ RSI ${x[9]} ｜ Pivot ${x[13]}</div>
+ <div class="tech">MA5 ${x[7]} ｜ MA10 ${x[8]} ｜ MA20 ${x[9]} ｜ RSI ${x[10]} ｜ Pivot ${x[14]}</div>
     </div>`
   ).join("");
 }
@@ -104,22 +104,7 @@ q.s3
     });
 
    
-    console.log("技術指標資料", {
-  ma5: q.ma5,
-  ma10: q.ma10,
-  ma20: q.ma20,
-  rsi14: q.rsi14,
-  bbUpper: q.bbUpper,
-  bbMiddle: q.bbMiddle,
-  bbLower: q.bbLower,
-  pivot: q.pivot,
-  r1: q.r1,
-  r2: q.r2,
-  r3: q.r3,
-  s1: q.s1,
-  s2: q.s2,
-  s3: q.s3
-});
+
  renderMarket();
   }catch(error){
     console.error("完整行情載入失敗", error);
