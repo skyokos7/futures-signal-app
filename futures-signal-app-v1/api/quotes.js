@@ -33,7 +33,7 @@ const MARKETS = [
 async function getQuote(item) {
   try {
     const url =
-      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(item.yahoo)}?interval=1d&range=3mo;
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(item.yahoo)}?interval=1d&range=3mo`;
 
     const response = await fetch(url, {
       headers: {
@@ -200,4 +200,4 @@ export default async function handler(req, res) {
     });
   }
 }
-}
+
