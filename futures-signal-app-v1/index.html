@@ -25,12 +25,13 @@
 <div class="tabs">
 <div class="tab active">全部</div><div class="tab">指數</div><div class="tab">外匯</div><div class="tab">金屬</div><div class="tab">穀物</div><div class="tab">能源</div>
 </div>
+<div class="card" id="chartArea"></div>
 <div class="card" id="market"></div>
 <div class="note">V1 為介面測試資料。下一階段接行情 API 與你的 Pivot／紅綠燈計算規則。</div>
 </div>
 <script>
 let data = [];
-
+let selectedMarket = "YM";
 function renderMarket(){
   document.getElementById("market").innerHTML = data.map(x =>
     `<div class="row">
@@ -47,7 +48,54 @@ function renderMarket(){
     </div>`
   ).join("");
 }
+function renderChart(quotes){
+  const q = quotes.find(item => item.id === selectedMarket);
+  const chartArea = document.getElementById("chartArea");
 
+  if(!q || !Array.isArray(q.history) || q.history.length < 2){
+    chartArea.innerHTML = "暫無走勢資料";
+    return;
+  }
+
+  const prices = q.history.map(d => Number(d.close));
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const range = max - min || 1;
+
+  const width = 600;
+  const height = 220;
+  const padding = 20;
+
+  const points = prices.map((price, i) => {
+    const x = padding + i * ((width - padding * 2) / (prices.length - 1));
+    const y = height - padding -
+      ((price - min) / range) * (height - padding * 2);
+
+    return `${x},${y}`;
+  }).join(" ");
+
+  chartArea.innerHTML = `
+    <div style="font-size:18px;font-weight:800;margin-bottom:8px">
+      ${q.name}｜最近30個交易日
+    </div>
+
+    <svg viewBox="0 0 ${width} ${height}"
+         style="width:100%;height:auto;display:block">
+      <polyline
+        points="${points}"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="3"
+        stroke-linejoin="round"
+        stroke-linecap="round">
+      </polyline>
+    </svg>
+
+    <div style="font-size:12px;color:#9fb0c0">
+      期間低點 ${min.toFixed(2)} ｜ 期間高點 ${max.toFixed(2)}
+    </div>
+  `;
+}
 async function loadAllMarkets(){
   try{
     const response = await fetch("/api/quotes");
@@ -104,8 +152,8 @@ q.s3
     });
 
    
-
- renderMarket();
+renderChart(result.quotes);
+renderMarket();
   }catch(error){
     console.error("完整行情載入失敗", error);
   }
