@@ -70,6 +70,10 @@ if (daily.length < 20) {
 }
 
 const closes = daily.map(d => d.close);
+const history = daily.slice(-30).map(d => ({
+  time: d.time,
+  close: d.close
+}));
 // ===== 計算 MA5 / MA10 / MA20 =====
 const avg = (arr) => {
   return arr.reduce((sum, value) => sum + value, 0) / arr.length;
@@ -143,6 +147,7 @@ const s3 = prevLow - 2 * (prevHigh - pivot);
         meta.chartPreviousClose ??
         null,
       currency: meta.currency ?? null,
+      history: history,
       marketTime: meta.regularMarketTime
         ? new Date(meta.regularMarketTime * 1000).toISOString()
         : null,
